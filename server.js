@@ -1,27 +1,39 @@
 const express = require('express');
 const app = express();
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const dotEnv = require('dotenv');
+
+dotEnv.config({ path: '.env'});
 
 app.use(express.json());
 
-app.listen(3000);
+app.listen(process.env.HOST_PORT);
 
 const posts = [
+	{username: 'Zhandor', content: 'first post by Zhandor'},
+	{username: 'Carol', content: 'first post by Carol'},
+	{username: 'Zhandor', content: 'second post by Zhandor'},
+	{username: 'Zhandor', content: 'third post by Zhandor'},
+	{username: 'Carol', content: 'second post by Carol'},
+	{username: 'Zhandor', content: 'forth post by Zhandor'},
+	{username: 'Carol', content: 'third post by Carol'},
+	{username: 'Zhandor', content: 'fifth post by Zhandor'}
+];
+
+const users = [
 	{
-		username: 'Zhandor',
-		title: 'first post'
-	},
-	{
-		username: 'Zhandor',
-		title: 'second post'
+		"username": "Zhandor",
+		"password": "$2b$10$SJ.W3ZEstv/NPMyEov1vUONmRjVPkHoMt3Ix53frbcfwG7RmCnTJi"
 	}
 ];
 
-const users = []
+app.get('/posts', authenticateToken, (req, res) => {
+	res.json(posts.filter(post => post.username === req.user.username));
+});
 
-app.get('/posts', (req, res) => {
+app.get('/posts/all', (req, res) => {
 	res.json(posts);
-	console.log('hello world');
 });
 
 app.get('/users', (req, res) => {
@@ -31,9 +43,11 @@ app.get('/users', (req, res) => {
 app.post('/users', async (req, res) => {
 	try{
 		const {username, password} = req.body;
+		if(users.some(user => user.username === username)){
+			return res.status(400).send('nome de usuário jé está em uso')
+		}
 		const salt = await bcrypt.genSalt();
 		const hashedPassword = await bcrypt.hash(password, salt);
-		console.log({salt, hashedPassword});
 
 		const user = {username, password: hashedPassword};
 
@@ -48,14 +62,14 @@ app.post('/users', async (req, res) => {
 
 app.post('/login', async (req, res) =>{
 	const {username, password} = req.body;
-	const user = users.find((user) => user.username = username);
+	const user = users.find((user) => user.username == username);
 	if(user == null){
 		return res.status(400).send('Usuário não encontrado');
 	}
 	try {
-		console.log({user, password});
 		if(await bcrypt.compare(password, user.password)){
-			res.send('Usuário logado com sucesso');
+			const accessToken = jwt.sign(user, process.env.JWT_ACCESS_TOKEN);
+			res.json({accessToken});
 		}else{
 			res.send('Usuário não encontrado ou senha incorreta');
 		}
@@ -64,3 +78,18 @@ app.post('/login', async (req, res) =>{
 	}
 
 });
+
+function authenticateToken(req, res, next){
+	const authHeader = req.headers['authorization'];
+	const token = authHeader && authHeader.split(' ')[1];
+	if(!token){
+		return res.sendStatus(401);
+	} 
+	jwt.verify(token, process.env.JWT_ACCESS_TOKEN, (error, user) => {
+		if(error){
+			return res.sendStatus(403)
+		}
+		req.user = user;
+		next();
+	});
+}
