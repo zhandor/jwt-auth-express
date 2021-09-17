@@ -21,13 +21,6 @@ const posts = [
 	{username: 'Zhandor', content: 'fifth post by Zhandor'}
 ];
 
-const users = [
-	{
-		"username": "Zhandor",
-		"password": "$2b$10$SJ.W3ZEstv/NPMyEov1vUONmRjVPkHoMt3Ix53frbcfwG7RmCnTJi"
-	}
-];
-
 app.get('/posts', authenticateToken, (req, res) => {
 	res.json(posts.filter(post => post.username === req.user.username));
 });
@@ -36,48 +29,7 @@ app.get('/posts/all', (req, res) => {
 	res.json(posts);
 });
 
-app.get('/users', (req, res) => {
-	res.json(users);
-});
 
-app.post('/users', async (req, res) => {
-	try{
-		const {username, password} = req.body;
-		if(users.some(user => user.username === username)){
-			return res.status(400).send('nome de usuário jé está em uso')
-		}
-		const salt = await bcrypt.genSalt();
-		const hashedPassword = await bcrypt.hash(password, salt);
-
-		const user = {username, password: hashedPassword};
-
-		users.push(user);
-		
-		res.json({user});
-	}catch(error){
-		res.json(error);
-	}
-	
-});
-
-app.post('/login', async (req, res) =>{
-	const {username, password} = req.body;
-	const user = users.find((user) => user.username == username);
-	if(user == null){
-		return res.status(400).send('Usuário não encontrado');
-	}
-	try {
-		if(await bcrypt.compare(password, user.password)){
-			const accessToken = jwt.sign(user, process.env.JWT_ACCESS_TOKEN);
-			res.json({accessToken});
-		}else{
-			res.send('Usuário não encontrado ou senha incorreta');
-		}
-	} catch (error) {
-		res.status(500).send(error);
-	}
-
-});
 
 function authenticateToken(req, res, next){
 	const authHeader = req.headers['authorization'];
