@@ -1,0 +1,58 @@
+//get all users
+GET http://localhost:4000/users
+
+###
+//create user
+POST http://localhost:4000/users
+Content-Type: application/json
+
+{
+	"username": "Ighor",
+    "password": "123456"
+}
+
+###
+//log user
+POST http://localhost:4000/login
+Content-Type: application/json
+
+{
+	"username": "Zhandor",
+    "password": "123456"
+}
+
+###
+
+GET http://localhost:3000/posts
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlpoYW5kb3IiLCJpYXQiOjE2MzIyNTY2ODQsImV4cCI6MTYzMjI1NjcxNH0.lvIfb-gmNOvi9HBGRLqcHkz5cfWJsRn0KTPMHKuZwe0
+
+###
+GET http://localhost:3000/posts/all
+
+###
+POST http://localhost:3000/posts
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlpoYW5kb3IiLCJpYXQiOjE2MzIyNTY2MDMsImV4cCI6MTYzMjI1NjYzM30.gd9W2hDvZrLGMMxTd1MqEXfxUUPgLNo0uu2T3U04n1c
+
+{
+	"content": "teste user via bearer token"
+}
+
+###
+POST http://localhost:4000/token
+Content-Type: application/json
+
+{
+	"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlpoYW5kb3IiLCJpYXQiOjE2MzIyNTY2MDN9.jKsvCMqgzxJuySRvVO7uTQmfx5dO_W7EipPAkqNTCEs"
+}
+
+###
+DELETE http://localhost:4000/logout
+Content-Type: application/json
+
+{
+	"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlpoYW5kb3IiLCJpYXQiOjE2MzIyNTYyMTZ9.W8OS0ciTcucpe5-rBWn__-Hjcoq9DwpOwYEqS2ECBEQ"
+}
+
+###
+GET http://localhost:4000/tokens

@@ -25,11 +25,17 @@ app.get('/posts', authenticateToken, (req, res) => {
 	res.json(posts.filter(post => post.username === req.user.username));
 });
 
+app.post('/posts', authenticateToken, (req, res) => {
+	const {body, user} = req;
+	const post = {username: user.username, content: body.content}
+	posts.push(post);
+
+	res.json(post);
+});
+
 app.get('/posts/all', (req, res) => {
 	res.json(posts);
 });
-
-
 
 function authenticateToken(req, res, next){
 	const authHeader = req.headers['authorization'];
